@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
 const ADSENSE_ID = "YOUR_ADSENSE_ID";
 
@@ -56,6 +55,8 @@ export default function App() {
   const vibeWords = vibe.trim() === "" ? 0 : vibe.trim().split(/\s+/).length;
   const vibeOver = vibeWords > 50;
 
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
   const generate = async () => {
     if (!message.trim()) { setError("Please paste a message first."); return; }
     if (vibeOver) { setError("Vibe description must be 50 words or less."); return; }
@@ -63,49 +64,16 @@ export default function App() {
     setReply("");
     setLoading(true);
 
-    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-
     try {
-      // Wake up Render first
-      await fetch(`${BACKEND_URL}`);
-      await delay(3000);
+      // Wake up Render backend first
+      try { await fetch(BACKEND_URL); } catch (e) {}
+      await sleep(3000);
 
       const res = await fetch(`${BACKEND_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, vibe, style }),
       });
-
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const data = await res.json();
-      setReply(data.reply || "No reply received.");
-      setTimeout(() => {
-        replyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 100);
-    } catch (err) {
-      setError("Could not reach the backend. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-    if (!message.trim()) { setError("Please paste a message first."); return; }
-    if (vibeOver) { setError("Vibe description must be 50 words or less."); return; }
-    setError("");
-    setReply("");
-    setLoading(true);
-
-    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-    const minDelay = delay(5500 + Math.random() * 1500);
-
-    try {
-      const [res] = await Promise.all([
-        fetch(`${BACKEND_URL}/api/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message, vibe, style }),
-        }),
-        minDelay,
-      ]);
 
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
@@ -250,45 +218,16 @@ export default function App() {
 }
 
 const s = {
-  root: {
-    minHeight: "100vh",
-    background: "linear-gradient(145deg, #080b1a 0%, #0e0f2a 50%, #110820 100%)",
-    position: "relative", overflowX: "hidden", paddingBottom: 80,
-  },
-  orb1: {
-    position: "fixed", top: -120, left: -80, width: 400, height: 400,
-    borderRadius: "50%", background: "radial-gradient(circle, #7c3aed55 0%, transparent 70%)",
-    animation: "pulse-orb 6s ease-in-out infinite", pointerEvents: "none",
-  },
-  orb2: {
-    position: "fixed", top: "30%", right: -100, width: 350, height: 350,
-    borderRadius: "50%", background: "radial-gradient(circle, #c026d344 0%, transparent 70%)",
-    animation: "pulse-orb 8s ease-in-out infinite 2s", pointerEvents: "none",
-  },
-  orb3: {
-    position: "fixed", bottom: 80, left: "20%", width: 280, height: 280,
-    borderRadius: "50%", background: "radial-gradient(circle, #2563eb33 0%, transparent 70%)",
-    animation: "pulse-orb 10s ease-in-out infinite 4s", pointerEvents: "none",
-  },
+  root: { minHeight: "100vh", background: "linear-gradient(145deg, #080b1a 0%, #0e0f2a 50%, #110820 100%)", position: "relative", overflowX: "hidden", paddingBottom: 80 },
+  orb1: { position: "fixed", top: -120, left: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, #7c3aed55 0%, transparent 70%)", animation: "pulse-orb 6s ease-in-out infinite", pointerEvents: "none" },
+  orb2: { position: "fixed", top: "30%", right: -100, width: 350, height: 350, borderRadius: "50%", background: "radial-gradient(circle, #c026d344 0%, transparent 70%)", animation: "pulse-orb 8s ease-in-out infinite 2s", pointerEvents: "none" },
+  orb3: { position: "fixed", bottom: 80, left: "20%", width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, #2563eb33 0%, transparent 70%)", animation: "pulse-orb 10s ease-in-out infinite 4s", pointerEvents: "none" },
   shell: { maxWidth: 520, margin: "0 auto", padding: "0 16px", position: "relative", zIndex: 1 },
   header: { display: "flex", alignItems: "center", gap: 14, padding: "28px 0 20px" },
-  logo: {
-    width: 56, height: 56, borderRadius: 14, objectFit: "cover", flexShrink: 0,
-    filter: "drop-shadow(0 0 10px #c026d388)",
-  },
-  title: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24,
-    letterSpacing: "-0.5px", lineHeight: 1.1,
-    background: "linear-gradient(135deg, #e879f9, #818cf8, #38bdf8)",
-    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-  },
+  logo: { width: 56, height: 56, borderRadius: 14, objectFit: "cover", flexShrink: 0, filter: "drop-shadow(0 0 10px #c026d388)" },
+  title: { fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 24, letterSpacing: "-0.5px", lineHeight: 1.1, background: "linear-gradient(135deg, #e879f9, #818cf8, #38bdf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
   subtitle: { fontSize: 12, color: "#6b7280", fontWeight: 400, marginTop: 2, letterSpacing: "0.5px", textTransform: "uppercase" },
-  card: {
-    background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)",
-    boxShadow: "0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)",
-    display: "flex", flexDirection: "column", gap: 20,
-  },
+  card: { background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: "24px 20px", backdropFilter: "blur(20px)", boxShadow: "0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", gap: 20 },
   section: { display: "flex", flexDirection: "column", gap: 8 },
   label: { fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, color: "#a5b4fc", letterSpacing: "0.3px", display: "flex", alignItems: "center", gap: 6 },
   labelIcon: { fontSize: 14 },
@@ -321,4 +260,4 @@ const s = {
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 };
 
-          
+                  
