@@ -8,6 +8,9 @@ const STYLES_CONFIG = [
   { id: "Business", label: "Business", emoji: "💼", desc: "Pro & sharp" },
   { id: "Flirty", label: "Flirty", emoji: "💜", desc: "Playful & warm" },
   { id: "Aura", label: "Aura", emoji: "✨", desc: "Mysterious & cool" },
+  { id: "Naija", label: "Naija", emoji: "🇳🇬", desc: "Nigerian slang" },
+  { id: "UK", label: "UK", emoji: "🇬🇧", desc: "Roadman vibes" },
+  { id: "Savage", label: "Savage", emoji: "😤", desc: "Zero filter" },
 ];
 
 function LoadingDots() {
@@ -65,7 +68,6 @@ export default function App() {
     setLoading(true);
 
     try {
-      // Wake up Render backend first
       try { await fetch(BACKEND_URL); } catch (e) {}
       await sleep(3000);
 
@@ -259,5 +261,3 @@ const s = {
   adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 };
-
-                  
