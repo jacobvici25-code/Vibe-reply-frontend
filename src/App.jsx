@@ -13,6 +13,15 @@ const STYLES_CONFIG = [
   { id: "Savage", label: "Savage", emoji: "😤", desc: "Zero filter" },
 ];
 
+const SITUATION_EXAMPLES = [
+  "e.g. This is my friend Jerry, we've been beefing for 2 weeks...",
+  "e.g. This is my boss, I need to sound professional but firm...",
+  "e.g. This is my crush, I want to sound cool and unbothered...",
+  "e.g. This person always disrespects me, I want to clap back...",
+  "e.g. My profile picture is already my real picture...",
+  "e.g. We just had an argument and they're trying to make up...",
+];
+
 function LoadingDots() {
   const [dots, setDots] = useState("");
   useEffect(() => {
@@ -53,16 +62,25 @@ export default function App() {
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showTip, setShowTip] = useState(false);
+  const [placeholder, setPlaceholder] = useState(SITUATION_EXAMPLES[0]);
   const replyRef = useRef(null);
 
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setPlaceholder(SITUATION_EXAMPLES[Math.floor(Math.random() * SITUATION_EXAMPLES.length)]);
+    }, 3000);
+    return () => clearInterval(iv);
+  }, []);
+
   const vibeWords = vibe.trim() === "" ? 0 : vibe.trim().split(/\s+/).length;
-  const vibeOver = vibeWords > 50;
+  const vibeOver = vibeWords > 100;
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   const generate = async () => {
-    if (!message.trim()) { setError("Please paste a message first."); return; }
-    if (vibeOver) { setError("Vibe description must be 50 words or less."); return; }
+    if (!message.trim()) { setError("Please paste the message you received first."); return; }
+    if (vibeOver) { setError("Situation description must be 100 words or less."); return; }
     setError("");
     setReply("");
     setLoading(true);
@@ -111,36 +129,59 @@ export default function App() {
         </header>
 
         <main style={s.card}>
+
+          {/* Message input */}
           <section style={s.section}>
             <label style={s.label}>
-              <span style={s.labelIcon}>💬</span> Message Received
+              <span style={s.labelIcon}>💬</span> Message You Received
             </label>
             <textarea
               style={s.textarea}
               rows={5}
-              placeholder="Paste the message you received..."
+              placeholder="Paste the message you received here..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
           </section>
 
+          {/* Situation input */}
           <section style={s.section}>
             <label style={s.label}>
-              <span style={s.labelIcon}>🎯</span> Your Vibe Instruction
+              <span style={s.labelIcon}>🎯</span> Explain Your Situation
+              <button
+                style={s.helpBtn}
+                onClick={() => setShowTip(!showTip)}
+              >
+                ?
+              </button>
               <span style={{ ...s.wordCount, color: vibeOver ? "#ff4d6d" : "#8b8fa8" }}>
-                {vibeWords}/50 words
+                {vibeWords}/100
               </span>
             </label>
+
+            {/* Tip box */}
+            {showTip && (
+              <div style={s.tipBox}>
+                <p style={s.tipTitle}>💡 How to explain your situation:</p>
+                <p style={s.tipText}>• Who sent you this message? (friend, crush, boss, enemy?)</p>
+                <p style={s.tipText}>• What's the background? (are you beefing? in love? at work?)</p>
+                <p style={s.tipText}>• What do you want to achieve with your reply?</p>
+                <p style={s.tipExample}>Example: "This is my friend Jerry. We've been beefing for 2 weeks. He's now acting like nothing happened. I want to reply cool but let him know I'm still upset."</p>
+              </div>
+            )}
+
             <textarea
               style={{ ...s.textareaSmall, ...(vibeOver ? s.textareaError : {}) }}
-              rows={2}
-              placeholder="Describe how you want the reply (max 50 words)..."
+              rows={3}
+              placeholder={placeholder}
               value={vibe}
               onChange={(e) => setVibe(e.target.value)}
+              onFocus={() => setShowTip(true)}
             />
-            {vibeOver && <p style={s.errorInline}>Trim your vibe to 50 words ✂️</p>}
+            {vibeOver && <p style={s.errorInline}>Too long! Keep it under 100 words ✂️</p>}
           </section>
 
+          {/* Style selector */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎨</span> Reply Style
@@ -233,7 +274,12 @@ const s = {
   section: { display: "flex", flexDirection: "column", gap: 8 },
   label: { fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, color: "#a5b4fc", letterSpacing: "0.3px", display: "flex", alignItems: "center", gap: 6 },
   labelIcon: { fontSize: 14 },
+  helpBtn: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: "50%", color: "#a78bfa", fontSize: 11, fontWeight: 700, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 },
   wordCount: { marginLeft: "auto", fontSize: 11, fontFamily: "'DM Sans', sans-serif", fontWeight: 400, transition: "color 0.2s" },
+  tipBox: { background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 10, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 },
+  tipTitle: { color: "#a78bfa", fontSize: 12, fontWeight: 700, fontFamily: "'Syne', sans-serif" },
+  tipText: { color: "#94a3b8", fontSize: 11, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 },
+  tipExample: { color: "#c084fc", fontSize: 11, fontFamily: "'DM Sans', sans-serif", fontStyle: "italic", lineHeight: 1.5, marginTop: 4, borderLeft: "2px solid #7c3aed", paddingLeft: 8 },
   textarea: { width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#e2e8f0", fontSize: 14, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, padding: "12px 14px", transition: "border-color 0.2s, box-shadow 0.2s" },
   textareaSmall: { width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#e2e8f0", fontSize: 13, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, padding: "10px 14px", transition: "border-color 0.2s, box-shadow 0.2s" },
   textareaError: { borderColor: "#ff4d6d", boxShadow: "0 0 0 3px #ff4d6d22" },
