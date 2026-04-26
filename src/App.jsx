@@ -64,6 +64,37 @@ export default function App() {
     setLoading(true);
 
     const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    try {
+      // Wake up Render first
+      await fetch(`${BACKEND_URL}`);
+      await delay(3000);
+
+      const res = await fetch(`${BACKEND_URL}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, vibe, style }),
+      });
+
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
+      setReply(data.reply || "No reply received.");
+      setTimeout(() => {
+        replyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 100);
+    } catch (err) {
+      setError("Could not reach the backend. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+    if (!message.trim()) { setError("Please paste a message first."); return; }
+    if (vibeOver) { setError("Vibe description must be 50 words or less."); return; }
+    setError("");
+    setReply("");
+    setLoading(true);
+
+    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
     const minDelay = delay(5500 + Math.random() * 1500);
 
     try {
