@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
-const ADSENSE_ID = "pub-2111784244218266";
+const ADSENSE_ID = "YOUR_ADSENSE_ID";
 
 const STYLES_CONFIG = [
   { id: "Casual", label: "Casual", emoji: "😎", desc: "Chill & relaxed" },
@@ -129,8 +129,6 @@ export default function App() {
         </header>
 
         <main style={s.card}>
-
-          {/* Message input */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>💬</span> Message You Received
@@ -144,29 +142,22 @@ export default function App() {
             />
           </section>
 
-          {/* Situation input */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎯</span> Explain Your Situation
-              <button
-                style={s.helpBtn}
-                onClick={() => setShowTip(!showTip)}
-              >
-                ?
-              </button>
+              <button style={s.helpBtn} onClick={() => setShowTip(!showTip)}>?</button>
               <span style={{ ...s.wordCount, color: vibeOver ? "#ff4d6d" : "#8b8fa8" }}>
                 {vibeWords}/100
               </span>
             </label>
 
-            {/* Tip box */}
             {showTip && (
               <div style={s.tipBox}>
                 <p style={s.tipTitle}>💡 How to explain your situation:</p>
                 <p style={s.tipText}>• Who sent you this message? (friend, crush, boss, enemy?)</p>
                 <p style={s.tipText}>• What's the background? (are you beefing? in love? at work?)</p>
                 <p style={s.tipText}>• What do you want to achieve with your reply?</p>
-                <p style={s.tipExample}>Example: "This is my friend Jerry. We've been beefing for 2 weeks. He's now acting like nothing happened. I want to reply cool but let him know I'm still upset."</p>
+                <p style={s.tipExample}>"This is my friend Jerry. We've been beefing for 2 weeks. He's now acting like nothing happened. I want to reply cool but let him know I'm still upset."</p>
               </div>
             )}
 
@@ -181,7 +172,6 @@ export default function App() {
             {vibeOver && <p style={s.errorInline}>Too long! Keep it under 100 words ✂️</p>}
           </section>
 
-          {/* Style selector */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎨</span> Reply Style
@@ -224,18 +214,16 @@ export default function App() {
           )}
         </main>
 
-        <div style={{ height: 20 }} />
+        {/* Footer Links */}
+        <div style={s.footerLinks}>
+          <a href="/about.html" style={s.footerLink}>About</a>
+          <span style={s.footerDot}>·</span>
+          <a href="/privacy.html" style={s.footerLink}>Privacy Policy</a>
+          <span style={s.footerDot}>·</span>
+          <a href="/terms.html" style={s.footerLink}>Terms</a>
+        </div>
 
-{/* Footer Links */}
-<div style={s.footerLinks}>
-  <a href="/about.html" style={s.footerLink}>About</a>
-  <span style={s.footerDot}>·</span>
-  <a href="/privacy.html" style={s.footerLink}>Privacy Policy</a>
-  <span style={s.footerDot}>·</span>
-  <a href="/terms.html" style={s.footerLink}>Terms</a>
-</div>
-
-<div style={{ height: 64 }} />
+        <div style={{ height: 64 }} />
       </div>
 
       <div style={s.adBanner}>
@@ -266,6 +254,7 @@ export default function App() {
           box-shadow: 0 0 0 3px #7c3aed28 !important;
         }
         button { cursor: pointer; border: none; }
+        a:hover { opacity: 0.8; }
       `}</style>
     </div>
   );
@@ -308,18 +297,16 @@ const s = {
   loadingOrb: { width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #c026d3, #7c3aed)", animation: "loading-pulse 1.4s ease-in-out infinite" },
   loadingText: { color: "#a78bfa", fontSize: 14, fontFamily: "'DM Sans', sans-serif", fontWeight: 500, letterSpacing: "0.3px" },
   dots: { display: "inline-block", width: 20, textAlign: "left", color: "#e879f9" },
-  replyBox: { background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(192,38,211,0.08))", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 14, padding: "16px", boxShadow: "0 0 30px rgba(124,58,237,0.1)", animation: "fadeSlideUp 0.5s ease forwards" },
+  replyBox: { background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(192,38,211,0.08))", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 14, padding: "16px", boxShadow: "0 0 30px rgba(124,56,237,0.1)", animation: "fadeSlideUp 0.5s ease forwards" },
   replyHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 },
   replyTag: { fontFamily: "'Syne', sans-serif", fontSize: 11, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.8px" },
   replyText: { color: "#e2e8f0", fontSize: 14, lineHeight: 1.75, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-wrap" },
   copyBtn: { background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#c084fc", fontSize: 12, fontFamily: "'Syne', sans-serif", fontWeight: 600, padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0 },
   copyBtnDone: { background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" },
+  footerLinks: { display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "20px 0 12px" },
+  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
+  footerDot: { color: "#374151", fontSize: 12 },
   adBanner: { position: "fixed", bottom: 0, left: 0, right: 0, height: 48, background: "rgba(8,11,26,0.92)", borderTop: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 100, padding: "0 16px" },
   adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-adText: { color: "#4b5563"... },
-  footerLinks: { display: "flex"... },
-  footerLink: { color: "#4b5563"... },
-  footerDot: { color: "#374151"... },
 };
-
