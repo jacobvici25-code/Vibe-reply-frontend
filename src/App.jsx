@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
-const ADSENSE_ID = "YOUR_ADSENSE_ID";
+const ADSENSE_ID = "pub-2111784244218266";
 
 const STYLES_CONFIG = [
   { id: "Casual", label: "Casual", emoji: "😎", desc: "Chill & relaxed" },
