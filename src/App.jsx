@@ -224,7 +224,18 @@ export default function App() {
           )}
         </main>
 
-        <div style={{ height: 64 }} />
+        <div style={{ height: 20 }} />
+
+{/* Footer Links */}
+<div style={s.footerLinks}>
+  <a href="/about.html" style={s.footerLink}>About</a>
+  <span style={s.footerDot}>·</span>
+  <a href="/privacy.html" style={s.footerLink}>Privacy Policy</a>
+  <span style={s.footerDot}>·</span>
+  <a href="/terms.html" style={s.footerLink}>Terms</a>
+</div>
+
+<div style={{ height: 64 }} />
       </div>
 
       <div style={s.adBanner}>
@@ -307,3 +318,6 @@ const s = {
   adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 };
+footerLinks: { display: "flex", justifyContent: "center", alignItems: "center", gap: 8, padding: "12px 0" },
+footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
+footerDot: { color: "#374151", fontSize: 12 },
