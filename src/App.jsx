@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
-const ADSENSE_ID = "YOUR_ADSENSE_ID";
 
 const STYLES_CONFIG = [
   { id: "Casual", label: "Casual", emoji: "😎", desc: "Chill & relaxed" },
@@ -13,6 +12,23 @@ const STYLES_CONFIG = [
   { id: "Savage", label: "Savage", emoji: "😤", desc: "Zero filter" },
 ];
 
+const QUICK_MESSAGES = [
+  "You're always late 🙄",
+  "Why are you acting weird?",
+  "You don't have money like that",
+  "I thought we were friends",
+  "Why didn't you invite me?",
+  "You've changed recently",
+];
+
+const LOADING_TEXTS = [
+  "Analyzing message…",
+  "Reading the vibes…",
+  "Crafting perfect reply…",
+  "Adding sauce…",
+  "Almost ready…",
+];
+
 const SITUATION_EXAMPLES = [
   "e.g. This is my friend Jerry, we've been beefing for 2 weeks...",
   "e.g. This is my boss, I need to sound professional but firm...",
@@ -22,19 +38,60 @@ const SITUATION_EXAMPLES = [
   "e.g. We just had an argument and they're trying to make up...",
 ];
 
+function TypewriterText({ text, onDone }) {
+  const [displayed, setDisplayed] = useState("");
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    setDisplayed("");
+    setIdx(0);
+  }, [text]);
+
+  useEffect(() => {
+    if (idx < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayed((prev) => prev + text[idx]);
+        setIdx((prev) => prev + 1);
+      }, 18);
+      return () => clearTimeout(timeout);
+    } else if (idx === text.length && onDone) {
+      onDone();
+    }
+  }, [idx, text]);
+
+  return <span>{displayed}</span>;
+}
+
 function LoadingDots() {
+  const [loadingText, setLoadingText] = useState(LOADING_TEXTS[0]);
+  const [fade, setFade] = useState(true);
   const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    const iv = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        i = (i + 1) % LOADING_TEXTS.length;
+        setLoadingText(LOADING_TEXTS[i]);
+        setFade(true);
+      }, 300);
+    }, 1800);
+    return () => clearInterval(iv);
+  }, []);
+
   useEffect(() => {
     const iv = setInterval(() => {
       setDots((d) => (d.length >= 3 ? "" : d + "."));
     }, 420);
     return () => clearInterval(iv);
   }, []);
+
   return (
     <div style={s.loadingWrap}>
       <div style={s.loadingOrb} />
-      <p style={s.loadingText}>
-        Vibe Reply is thinking<span style={s.dots}>{dots}</span>
+      <p style={{ ...s.loadingText, opacity: fade ? 1 : 0, transition: "opacity 0.3s" }}>
+        {loadingText}<span style={s.dots}>{dots}</span>
       </p>
     </div>
   );
@@ -49,8 +106,11 @@ function CopyButton({ text }) {
     });
   };
   return (
-    <button style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}) }} onClick={copy}>
-      {copied ? "✓ Copied!" : "Copy Reply"}
+    <button
+      style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}), transform: copied ? "scale(1.05)" : "scale(1)" }}
+      onClick={copy}
+    >
+      {copied ? "Copied! 🔥" : "Copy Reply"}
     </button>
   );
 }
@@ -64,6 +124,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [showTip, setShowTip] = useState(false);
   const [placeholder, setPlaceholder] = useState(SITUATION_EXAMPLES[0]);
+  const [typingDone, setTypingDone] = useState(false);
   const replyRef = useRef(null);
 
   useEffect(() => {
@@ -78,11 +139,12 @@ export default function App() {
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  const generate = async () => {
+  const callAPI = async () => {
     if (!message.trim()) { setError("Please paste the message you received first."); return; }
     if (vibeOver) { setError("Situation description must be 100 words or less."); return; }
     setError("");
     setReply("");
+    setTypingDone(false);
     setLoading(true);
 
     try {
@@ -129,6 +191,26 @@ export default function App() {
         </header>
 
         <main style={s.card}>
+
+          {/* Quick Start Messages */}
+          <section style={s.section}>
+            <label style={s.label}>
+              <span style={s.labelIcon}>⚡</span> Try a quick message
+            </label>
+            <div style={s.quickGrid}>
+              {QUICK_MESSAGES.map((msg, i) => (
+                <button
+                  key={i}
+                  style={s.quickBtn}
+                  onClick={() => setMessage(msg)}
+                >
+                  {msg}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Message input */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>💬</span> Message You Received
@@ -142,6 +224,7 @@ export default function App() {
             />
           </section>
 
+          {/* Situation input */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎯</span> Explain Your Situation
@@ -172,6 +255,7 @@ export default function App() {
             {vibeOver && <p style={s.errorInline}>Too long! Keep it under 100 words ✂️</p>}
           </section>
 
+          {/* Style selector */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎨</span> Reply Style
@@ -193,9 +277,10 @@ export default function App() {
 
           {error && <p style={s.errorBanner}>⚠️ {error}</p>}
 
+          {/* Generate button */}
           <button
             style={{ ...s.genBtn, ...(loading ? s.genBtnDisabled : {}) }}
-            onClick={generate}
+            onClick={callAPI}
             disabled={loading}
           >
             {loading ? "Generating…" : "Generate Reply ✦"}
@@ -203,13 +288,29 @@ export default function App() {
 
           {loading && <LoadingDots />}
 
+          {/* Reply box */}
           {reply && !loading && (
             <div ref={replyRef} style={s.replyBox}>
               <div style={s.replyHeader}>
                 <span style={s.replyTag}>✦ AI Reply · {style}</span>
                 <CopyButton text={reply} />
               </div>
-              <p style={s.replyText}>{reply}</p>
+              <p style={s.replyText}>
+                <TypewriterText
+                  text={reply}
+                  onDone={() => setTypingDone(true)}
+                />
+              </p>
+
+              {/* Regenerate button */}
+              {typingDone && (
+                <button
+                  style={s.regenBtn}
+                  onClick={callAPI}
+                >
+                  🔄 Try another reply
+                </button>
+              )}
             </div>
           )}
         </main>
@@ -226,6 +327,7 @@ export default function App() {
         <div style={{ height: 64 }} />
       </div>
 
+      {/* Ad Banner */}
       <div style={s.adBanner}>
         <span style={s.adLabel}>Ad</span>
         <span style={s.adText}>Your AdSense ad will appear here</span>
@@ -247,6 +349,10 @@ export default function App() {
           0%, 100% { box-shadow: 0 0 18px 6px #c026d3, 0 0 40px 12px #7c3aed44; }
           50% { box-shadow: 0 0 30px 12px #e879f9, 0 0 60px 20px #7c3aed66; }
         }
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
         textarea::placeholder { color: #4a4f6a; }
         textarea { outline: none; resize: vertical; }
         textarea:focus {
@@ -254,6 +360,7 @@ export default function App() {
           box-shadow: 0 0 0 3px #7c3aed28 !important;
         }
         button { cursor: pointer; border: none; }
+        button:active { transform: scale(0.96) !important; }
         a:hover { opacity: 0.8; }
       `}</style>
     </div>
@@ -274,6 +381,8 @@ const s = {
   section: { display: "flex", flexDirection: "column", gap: 8 },
   label: { fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, color: "#a5b4fc", letterSpacing: "0.3px", display: "flex", alignItems: "center", gap: 6 },
   labelIcon: { fontSize: 14 },
+  quickGrid: { display: "flex", flexWrap: "wrap", gap: 8 },
+  quickBtn: { background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 20, color: "#c084fc", fontSize: 12, fontFamily: "'DM Sans', sans-serif", padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap" },
   helpBtn: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: "50%", color: "#a78bfa", fontSize: 11, fontWeight: 700, width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 },
   wordCount: { marginLeft: "auto", fontSize: 11, fontFamily: "'DM Sans', sans-serif", fontWeight: 400, transition: "color 0.2s" },
   tipBox: { background: "rgba(124,58,237,0.1)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 10, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 6 },
@@ -297,16 +406,12 @@ const s = {
   loadingOrb: { width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #c026d3, #7c3aed)", animation: "loading-pulse 1.4s ease-in-out infinite" },
   loadingText: { color: "#a78bfa", fontSize: 14, fontFamily: "'DM Sans', sans-serif", fontWeight: 500, letterSpacing: "0.3px" },
   dots: { display: "inline-block", width: 20, textAlign: "left", color: "#e879f9" },
-  replyBox: { background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(192,38,211,0.08))", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 14, padding: "16px", boxShadow: "0 0 30px rgba(124,56,237,0.1)", animation: "fadeSlideUp 0.5s ease forwards" },
+  replyBox: { background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(192,38,211,0.08))", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 14, padding: "16px", boxShadow: "0 0 30px rgba(124,58,237,0.1)", animation: "fadeSlideUp 0.5s ease forwards" },
   replyHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 },
   replyTag: { fontFamily: "'Syne', sans-serif", fontSize: 11, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.8px" },
-  replyText: { color: "#e2e8f0", fontSize: 14, lineHeight: 1.75, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-wrap" },
+  replyText: { color: "#e2e8f0", fontSize: 14, lineHeight: 1.75, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-wrap", minHeight: 40 },
+  regenBtn: { marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#a78bfa", fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", animation: "popIn 0.3s ease forwards" },
   copyBtn: { background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#c084fc", fontSize: 12, fontFamily: "'Syne', sans-serif", fontWeight: 600, padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0 },
   copyBtnDone: { background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" },
   footerLinks: { display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "20px 0 12px" },
-  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
-  footerDot: { color: "#374151", fontSize: 12 },
-  adBanner: { position: "fixed", bottom: 0, left: 0, right: 0, height: 48, background: "rgba(8,11,26,0.92)", borderTop: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 100, padding: "0 16px" },
-  adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
-  adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-};
+  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-
