@@ -414,4 +414,5 @@ const s = {
   copyBtn: { background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#c084fc", fontSize: 12, fontFamily: "'Syne', sans-serif", fontWeight: 600, padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0 },
   copyBtnDone: { background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" },
   footerLinks: { display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "20px 0 12px" },
-  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-
+  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" }, adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, };
+   
