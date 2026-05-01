@@ -164,7 +164,7 @@ export default function App() {
         replyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 100);
     } catch (err) {
-      setError("⚠️ No internet connection. Check your network and try again.");
+      setError("No internet connection. Check your network and try again.");
     } finally {
       setLoading(false);
     }
