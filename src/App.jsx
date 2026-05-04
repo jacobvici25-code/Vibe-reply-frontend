@@ -315,7 +315,7 @@ export default function App() {
               <div style={s.replyHeader}>
                 <span style={s.replyTag}>✦ AI Reply · {style}</span>
                 <CopyButton text={reply} />
-                <ShareButton text={reply} />
+                <ShareButton text={reply} message={message} style={style} />
               </div>
               <p style={s.replyText}>
                 <TypewriterText
@@ -443,4 +443,3 @@ const s = {
   adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 };
-             
