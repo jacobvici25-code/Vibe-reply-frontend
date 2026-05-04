@@ -435,4 +435,4 @@ const s = {
   regenBtn: { marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#a78bfa", fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", animation: "popIn 0.3s ease forwards" },
   copyBtn: { background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8,
 shareBtn: { background: "rgba(232,121,249,0.15)"...
-          };
+   };
