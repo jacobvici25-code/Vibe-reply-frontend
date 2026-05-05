@@ -387,8 +387,7 @@ export default function App() {
       `}</style>
     </div>
   );
-}
-
+                       }
 const s = {
   root: { minHeight: "100vh", background: "linear-gradient(145deg, #080b1a 0%, #0e0f2a 50%, #110820 100%)", position: "relative", overflowX: "hidden", paddingBottom: 80 },
   orb1: { position: "fixed", top: -120, left: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, #7c3aed55 0%, transparent 70%)", animation: "pulse-orb 6s ease-in-out infinite", pointerEvents: "none" },
@@ -443,4 +442,6 @@ const s = {
   adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
   adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 };
-            
+
+    
+    
