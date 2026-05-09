@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/vibe-reply-ai.jsx << 'JSXEOF'
 import { useState, useEffect, useRef } from "react";
 
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
@@ -106,15 +107,11 @@ function CopyButton({ text }) {
     });
   };
   return (
-    <button
-      style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}), transform: copied ? "scale(1.05)" : "scale(1)" }}
-      onClick={copy}
-    >
+    <button style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}) }} onClick={copy}>
       {copied ? "Copied! 🔥" : "Copy Reply"}
     </button>
   );
 }
-
 
 function ShareButton({ text, message, style }) {
   const share = async () => {
@@ -125,14 +122,49 @@ function ShareButton({ text, message, style }) {
           text: `💬 "${message}"\n\n✦ ${style} Reply: ${text}\n\nTry Vibe Reply AI 🔥\nvibe-reply-frontend.vercel.app`,
         });
       } catch (e) {}
-    } else {
-      navigator.clipboard.writeText(text);
     }
   };
+  return <button style={s.shareBtn} onClick={share}>Share 🔥</button>;
+}
+
+function CoachingBox({ coaching }) {
+  const [open, setOpen] = useState(false);
+  if (!coaching) return null;
   return (
-    <button style={s.shareBtn} onClick={share}>
-      Share 🔥
-    </button>
+    <div style={s.coachingWrap}>
+      <button style={s.coachingToggle} onClick={() => setOpen(!open)}>
+        <span>🧠 Why this reply works</span>
+        <span style={{ transition: "transform 0.3s", display: "inline-block", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
+      </button>
+      {open && (
+        <div style={s.coachingContent}>
+          {coaching.headline && (
+            <div style={s.coachingItem}>
+              <span style={s.coachingLabel}>✦ Summary</span>
+              <p style={s.coachingText}>{coaching.headline}</p>
+            </div>
+          )}
+          {coaching.emotional_effect && (
+            <div style={s.coachingItem}>
+              <span style={s.coachingLabel}>💭 Emotional Effect</span>
+              <p style={s.coachingText}>{coaching.emotional_effect}</p>
+            </div>
+          )}
+          {coaching.strategy && (
+            <div style={s.coachingItem}>
+              <span style={s.coachingLabel}>🎯 Strategy</span>
+              <p style={s.coachingText}>{coaching.strategy}</p>
+            </div>
+          )}
+          {coaching.confidence_tip && (
+            <div style={s.coachingItem}>
+              <span style={s.coachingLabel}>💪 Confidence Tip</span>
+              <p style={s.coachingText}>{coaching.confidence_tip}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -141,6 +173,7 @@ export default function App() {
   const [vibe, setVibe] = useState("");
   const [style, setStyle] = useState("Casual");
   const [reply, setReply] = useState("");
+  const [coaching, setCoaching] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showTip, setShowTip] = useState(false);
@@ -165,6 +198,7 @@ export default function App() {
     if (vibeOver) { setError("Situation description must be 100 words or less."); return; }
     setError("");
     setReply("");
+    setCoaching(null);
     setTypingDone(false);
     setLoading(true);
 
@@ -181,11 +215,12 @@ export default function App() {
       if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
       setReply(data.reply || "No reply received.");
+      setCoaching(data.coaching || null);
       setTimeout(() => {
         replyRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 100);
     } catch (err) {
-      setError("No internet connection. Check your network and try again.");
+      setError("⚠️ No internet connection. Check your network and try again.");
     } finally {
       setLoading(false);
     }
@@ -199,12 +234,7 @@ export default function App() {
 
       <div style={s.shell}>
         <header style={s.header}>
-          <img
-            src="/logo.png"
-            alt="Vibe Reply AI Logo"
-            style={s.logo}
-            onError={(e) => { e.target.style.display = "none"; }}
-          />
+          <img src="/logo.png" alt="Vibe Reply AI Logo" style={s.logo} onError={(e) => { e.target.style.display = "none"; }} />
           <div>
             <h1 style={s.title}>Vibe Reply AI</h1>
             <p style={s.subtitle}>Demo · AI-powered smart replies</p>
@@ -212,82 +242,44 @@ export default function App() {
         </header>
 
         <main style={s.card}>
-
-          {/* Quick Start Messages */}
           <section style={s.section}>
-            <label style={s.label}>
-              <span style={s.labelIcon}>⚡</span> Try a quick message
-            </label>
+            <label style={s.label}><span style={s.labelIcon}>⚡</span> Try a quick message</label>
             <div style={s.quickGrid}>
               {QUICK_MESSAGES.map((msg, i) => (
-                <button
-                  key={i}
-                  style={s.quickBtn}
-                  onClick={() => setMessage(msg)}
-                >
-                  {msg}
-                </button>
+                <button key={i} style={s.quickBtn} onClick={() => setMessage(msg)}>{msg}</button>
               ))}
             </div>
           </section>
 
-          {/* Message input */}
           <section style={s.section}>
-            <label style={s.label}>
-              <span style={s.labelIcon}>💬</span> Message You Received
-            </label>
-            <textarea
-              style={s.textarea}
-              rows={5}
-              placeholder="Paste the message you received here..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
+            <label style={s.label}><span style={s.labelIcon}>💬</span> Message You Received</label>
+            <textarea style={s.textarea} rows={5} placeholder="Paste the message you received here..." value={message} onChange={(e) => setMessage(e.target.value)} />
           </section>
 
-          {/* Situation input */}
           <section style={s.section}>
             <label style={s.label}>
               <span style={s.labelIcon}>🎯</span> Explain Your Situation
               <button style={s.helpBtn} onClick={() => setShowTip(!showTip)}>?</button>
-              <span style={{ ...s.wordCount, color: vibeOver ? "#ff4d6d" : "#8b8fa8" }}>
-                {vibeWords}/100
-              </span>
+              <span style={{ ...s.wordCount, color: vibeOver ? "#ff4d6d" : "#8b8fa8" }}>{vibeWords}/100</span>
             </label>
-
             {showTip && (
               <div style={s.tipBox}>
                 <p style={s.tipTitle}>💡 How to explain your situation:</p>
-                <p style={s.tipText}>• Who sent you this message? (friend, crush, boss, enemy?)</p>
-                <p style={s.tipText}>• What's the background? (are you beefing? in love? at work?)</p>
-                <p style={s.tipText}>• What do you want to achieve with your reply?</p>
-                <p style={s.tipExample}>"This is my friend Jerry. We've been beefing for 2 weeks. He's now acting like nothing happened. I want to reply cool but let him know I'm still upset."</p>
+                <p style={s.tipText}>• Who sent you this message?</p>
+                <p style={s.tipText}>• What's the background?</p>
+                <p style={s.tipText}>• What do you want to achieve?</p>
+                <p style={s.tipExample}>"This is my friend Jerry. We've been beefing for 2 weeks. I want to reply cool but let him know I'm still upset."</p>
               </div>
             )}
-
-            <textarea
-              style={{ ...s.textareaSmall, ...(vibeOver ? s.textareaError : {}) }}
-              rows={3}
-              placeholder={placeholder}
-              value={vibe}
-              onChange={(e) => setVibe(e.target.value)}
-              onFocus={() => setShowTip(true)}
-            />
+            <textarea style={{ ...s.textareaSmall, ...(vibeOver ? s.textareaError : {}) }} rows={3} placeholder={placeholder} value={vibe} onChange={(e) => setVibe(e.target.value)} onFocus={() => setShowTip(true)} />
             {vibeOver && <p style={s.errorInline}>Too long! Keep it under 100 words ✂️</p>}
           </section>
 
-          {/* Style selector */}
           <section style={s.section}>
-            <label style={s.label}>
-              <span style={s.labelIcon}>🎨</span> Reply Style
-            </label>
+            <label style={s.label}><span style={s.labelIcon}>🎨</span> Reply Style</label>
             <div style={s.stylesGrid}>
               {STYLES_CONFIG.map((st) => (
-                <button
-                  key={st.id}
-                  style={{ ...s.styleBtn, ...(style === st.id ? s.styleBtnActive : {}) }}
-                  onClick={() => setStyle(st.id)}
-                >
+                <button key={st.id} style={{ ...s.styleBtn, ...(style === st.id ? s.styleBtnActive : {}) }} onClick={() => setStyle(st.id)}>
                   <span style={s.styleBtnEmoji}>{st.emoji}</span>
                   <span style={s.styleBtnLabel}>{st.label}</span>
                   <span style={s.styleBtnDesc}>{st.desc}</span>
@@ -298,46 +290,34 @@ export default function App() {
 
           {error && <p style={s.errorBanner}>⚠️ {error}</p>}
 
-          {/* Generate button */}
-          <button
-            style={{ ...s.genBtn, ...(loading ? s.genBtnDisabled : {}) }}
-            onClick={callAPI}
-            disabled={loading}
-          >
+          <button style={{ ...s.genBtn, ...(loading ? s.genBtnDisabled : {}) }} onClick={callAPI} disabled={loading}>
             {loading ? "Generating…" : "Generate Reply ✦"}
           </button>
 
           {loading && <LoadingDots />}
 
-          {/* Reply box */}
           {reply && !loading && (
             <div ref={replyRef} style={s.replyBox}>
               <div style={s.replyHeader}>
                 <span style={s.replyTag}>✦ AI Reply · {style}</span>
-                <CopyButton text={reply} />
-                <ShareButton text={reply} message={message} style={style} />
+                <div style={{ display: "flex", gap: 6 }}>
+                  <CopyButton text={reply} />
+                  <ShareButton text={reply} message={message} style={style} />
+                </div>
               </div>
               <p style={s.replyText}>
-                <TypewriterText
-                  text={reply}
-                  onDone={() => setTypingDone(true)}
-                />
+                <TypewriterText text={reply} onDone={() => setTypingDone(true)} />
               </p>
-
-              {/* Regenerate button */}
               {typingDone && (
-                <button
-                  style={s.regenBtn}
-                  onClick={callAPI}
-                >
-                  🔄 Try another reply
-                </button>
+                <>
+                  <button style={s.regenBtn} onClick={callAPI}>🔄 Try another reply</button>
+                  <CoachingBox coaching={coaching} />
+                </>
               )}
             </div>
           )}
         </main>
 
-        {/* Footer Links */}
         <div style={s.footerLinks}>
           <a href="/about.html" style={s.footerLink}>About</a>
           <span style={s.footerDot}>·</span>
@@ -349,7 +329,6 @@ export default function App() {
         <div style={{ height: 64 }} />
       </div>
 
-      {/* Ad Banner */}
       <div style={s.adBanner}>
         <span style={s.adLabel}>Ad</span>
         <span style={s.adText}>Your AdSense ad will appear here</span>
@@ -359,35 +338,22 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #080b1a; font-family: 'DM Sans', sans-serif; }
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse-orb {
-          0%, 100% { opacity: 0.35; transform: scale(1); }
-          50% { opacity: 0.55; transform: scale(1.08); }
-        }
-        @keyframes loading-pulse {
-          0%, 100% { box-shadow: 0 0 18px 6px #c026d3, 0 0 40px 12px #7c3aed44; }
-          50% { box-shadow: 0 0 30px 12px #e879f9, 0 0 60px 20px #7c3aed66; }
-        }
-        @keyframes popIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-orb { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.55; transform: scale(1.08); } }
+        @keyframes loading-pulse { 0%, 100% { box-shadow: 0 0 18px 6px #c026d3, 0 0 40px 12px #7c3aed44; } 50% { box-shadow: 0 0 30px 12px #e879f9, 0 0 60px 20px #7c3aed66; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         textarea::placeholder { color: #4a4f6a; }
         textarea { outline: none; resize: vertical; }
-        textarea:focus {
-          border-color: #7c3aed !important;
-          box-shadow: 0 0 0 3px #7c3aed28 !important;
-        }
+        textarea:focus { border-color: #7c3aed !important; box-shadow: 0 0 0 3px #7c3aed28 !important; }
         button { cursor: pointer; border: none; }
         button:active { transform: scale(0.96) !important; }
         a:hover { opacity: 0.8; }
       `}</style>
     </div>
   );
-                       }
+}
+
 const s = {
   root: { minHeight: "100vh", background: "linear-gradient(145deg, #080b1a 0%, #0e0f2a 50%, #110820 100%)", position: "relative", overflowX: "hidden", paddingBottom: 80 },
   orb1: { position: "fixed", top: -120, left: -80, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, #7c3aed55 0%, transparent 70%)", animation: "pulse-orb 6s ease-in-out infinite", pointerEvents: "none" },
@@ -429,19 +395,4 @@ const s = {
   dots: { display: "inline-block", width: 20, textAlign: "left", color: "#e879f9" },
   replyBox: { background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(192,38,211,0.08))", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 14, padding: "16px", boxShadow: "0 0 30px rgba(124,58,237,0.1)", animation: "fadeSlideUp 0.5s ease forwards" },
   replyHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 },
-  replyTag: { fontFamily: "'Syne', sans-serif", fontSize: 11, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.8px" },
-  replyText: { color: "#e2e8f0", fontSize: 14, lineHeight: 1.75, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-wrap", minHeight: 40 },
-  regenBtn: { marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", color: "#a78bfa", fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 600, transition: "all 0.2s", animation: "popIn 0.3s ease forwards" },
-  copyBtn: { background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8, color: "#c084fc", fontSize: 12, fontFamily: "'Syne', sans-serif", fontWeight: 600, padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0 },
-  copyBtnDone: { background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.3)", color: "#34d399" },
-  shareBtn: { background: "rgba(232,121,249,0.15)", border: "1px solid rgba(232,121,249,0.3)", borderRadius: 8, color: "#e879f9", fontSize: 12, fontFamily: "'Syne', sans-serif", fontWeight: 600, padding: "6px 12px", transition: "all 0.2s", whiteSpace: "nowrap", flexShrink: 0 },
-  footerLinks: { display: "flex", justifyContent: "center", alignItems: "center", gap: 10, padding: "20px 0 12px" },
-  footerLink: { color: "#4b5563", fontSize: 12, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" },
-  footerDot: { color: "#374151", fontSize: 12 },
-  adBanner: { position: "fixed", bottom: 0, left: 0, right: 0, height: 48, background: "rgba(8,11,26,0.92)", borderTop: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 100, padding: "0 16px" },
-  adLabel: { background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)", borderRadius: 4, color: "#a78bfa", fontSize: 10, fontFamily: "'Syne', sans-serif", fontWeight: 700, padding: "2px 6px", letterSpacing: "0.5px", flexShrink: 0 },
-  adText: { color: "#4b5563", fontSize: 12, fontFamily: "'DM Sans', sans-serif", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-};
-
-    
-    
+  replyTag: { fontFamily: "'Syne', sans-serif", fontS
