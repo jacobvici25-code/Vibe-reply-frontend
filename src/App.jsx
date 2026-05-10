@@ -1,8 +1,5 @@
-cat > /mnt/user-data/outputs/vibe-reply-ai.jsx << 'JSXEOF'
 import { useState, useEffect, useRef } from "react";
-
 const BACKEND_URL = "https://vibe-reply-backend.onrender.com";
-
 const STYLES_CONFIG = [
   { id: "Casual", label: "Casual", emoji: "😎", desc: "Chill & relaxed" },
   { id: "Business", label: "Business", emoji: "💼", desc: "Pro & sharp" },
